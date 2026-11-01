@@ -5,3 +5,8 @@ venv/
 *.db
 *.idea
 *.ruff_cache
+.env
+.DS_Store
+.ipynb_checkpoints/
+# Extracted from 4_data_analysis/ml_results/advanced/fixed_data.rar (about 145 MB)
+4_data_analysis/ml_results/advanced/fixed_data/

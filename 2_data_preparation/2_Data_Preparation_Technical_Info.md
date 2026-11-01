@@ -7,8 +7,8 @@
 ```python
 def get_engine():
     """Create SQLAlchemy engine for MariaDB connection"""
-    DB_USER = "root"
-    DB_PASSWORD = "123456789"
+    DB_USER = "User"
+    DB_PASSWORD = "Password"
     DB_HOST = "127.0.0.1"
     DB_PORT = "3306"
     DB_NAME = "newdata"
