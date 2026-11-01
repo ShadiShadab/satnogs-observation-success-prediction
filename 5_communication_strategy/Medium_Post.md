@@ -1,5 +1,8 @@
 # 🚀 How I Increased Satellite Observation Success Rates by 38.8% Using Machine Learning
 
+> **Note (November 2026):** "Success rate 49.5% → 88.3%" compares the model's test accuracy with the dataset's base success rate. It is a simulated scheduling scenario on historical data, not a measured operational change. See the [robustness check](../4_data_analysis/ml_results/robustness/README.md) for time-based validation results.
+
+
 ## An MIT Capstone Project with Real Impact for the SatNOGS Community
 
 [Satellite Observation Success Improvement](https://medium.com/@sh.shadab1988/how-machine-learning-boosted-satellite-observation-success-by-38-8-4d79ad3327cb)
