@@ -1,4 +1,7 @@
 # 🛰️ Satellite Pass Prediction & Observation Success Rate
+
+> **Note (November 2026):** "Success rate 49.5% → 88.3%" compares the model's test accuracy with the dataset's base success rate. It is a simulated scheduling scenario on historical data, not a measured operational change. See the [robustness check](ml_results/robustness/README.md) for time-based validation results.
+
 ## Machine Learning Modeling – Data Analysis
 
 ---

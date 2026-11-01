@@ -1,0 +1,5 @@
+# Dashboard only. Tested with streamlit 1.66, pandas 3.1, numpy 2.5, plotly 7.1 on Python 3.14.
+streamlit>=1.28
+pandas>=2.1
+numpy>=1.24
+plotly>=5.17

@@ -1,5 +1,8 @@
 # Communication Strategy
 
+> **Note (November 2026):** "Success rate 49.5% → 88.3%" compares the model's test accuracy with the dataset's base success rate. It is a simulated scheduling scenario on historical data, not a measured operational change. See the [robustness check](../4_data_analysis/ml_results/robustness/README.md) for time-based validation results.
+
+
 > *"The most important ML metric isn't ROC-AUC. It's real-world impact."*
 
 This folder contains comprehensive communication materials designed to translate technical machine learning achievements into actionable insights for stakeholders, community members, and potential users of the satellite observation prediction system.

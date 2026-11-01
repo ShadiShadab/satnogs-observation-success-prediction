@@ -1,4 +1,4 @@
-﻿"""
+"""
 SatNOGS Success Predictor Dashboard - OPTIMIZED VERSION
 Uses pre-computed results to avoid loading 267MB model unnecessarily
 """
@@ -12,6 +12,10 @@ import json
 import os
 import base64
 from pathlib import Path
+
+# Repository root: app.py lives in 5_communication_strategy/dashboard/dashboard_prototype/
+REPO_ROOT = Path(__file__).resolve().parents[3]
+RESULTS_DIR = REPO_ROOT / "4_data_analysis" / "ml_results"
 
 # Page configuration
 st.set_page_config(
@@ -60,10 +64,20 @@ st.markdown("""
 def load_metrics():
     """Load performance metrics"""
     try:
-        metrics_path = Path("../4_data_analysis/ml_results/advanced/final_test_metrics.json")
+        metrics_path = RESULTS_DIR / "advanced/final_test_metrics.json"
         if metrics_path.exists():
             with open(metrics_path, 'r') as f:
-                return json.load(f)
+                raw = json.load(f)
+            impact = raw.get("business_impact", {})
+            return {
+                "accuracy": raw["test_accuracy"],
+                "precision": raw["test_precision"],
+                "recall": raw["test_recall"],
+                "f1_score": raw["test_f1"],
+                "roc_auc": raw["test_roc_auc"],
+                "success_rate_improvement": impact.get("improvement_percentage", 0) / 100,
+                "failed_obs_reduction": impact.get("failed_observations_reduction", 0) / 100,
+            }
     except:
         pass
     
@@ -82,7 +96,7 @@ def load_metrics():
 def load_feature_importance():
     """Load feature importance data"""
     try:
-        feature_path = Path("../4_data_analysis/ml_results/advanced/feature_importance_final.csv")
+        feature_path = RESULTS_DIR / "advanced/feature_importance_final.csv"
         if feature_path.exists():
             df = pd.read_csv(feature_path)
             # Sort by importance
@@ -105,7 +119,7 @@ def load_feature_importance():
 def load_test_predictions():
     """Load a sample of test predictions"""
     try:
-        pred_path = Path("../4_data_analysis/ml_results/advanced/test_set_predictions.csv")
+        pred_path = RESULTS_DIR / "advanced/test_set_predictions.csv"
         if pred_path.exists():
             df = pd.read_csv(pred_path, nrows=1000)  # Load only first 1000 rows
             return df
@@ -117,9 +131,10 @@ def load_test_predictions():
 def load_permutation_importance():
     """Load permutation importance data"""
     try:
-        perm_path = Path("../4_data_analysis/ml_results/interpretation/permutation_importance.csv")
+        perm_path = RESULTS_DIR / "interpretation/permutation_importance.csv"
         if perm_path.exists():
             df = pd.read_csv(perm_path)
+            df = df.rename(columns={'importance_mean': 'importance'})
             df = df.sort_values('importance', ascending=False).head(10)
             return df
     except:
@@ -155,7 +170,7 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.image("https://en.wikipedia.org/wiki/SatNOGS#/media/File:SatNOGS-logo-vertical-black.png", width=200)
+        st.markdown("## 🛰️ SatNOGS")
         
         st.markdown("### 📊 Dashboard Sections")
         section = st.radio(
@@ -173,7 +188,7 @@ def main():
         with col2:
             st.metric("Accuracy", f"{metrics['accuracy']*100:.1f}%")
         
-        st.metric("Improvement", f"+{metrics['success_rate_improvement']*100:.1f}%")
+        st.metric("Theoretical uplift", f"+{metrics['success_rate_improvement']*100:.1f} pp", help="Model accuracy minus the 49.5% base rate on the held-out test set. A simulated scheduling scenario, not a measured operational result.")
         
         st.markdown("---")
         st.markdown("### 🔗 Project Links")
@@ -203,9 +218,9 @@ def show_performance_overview(metrics):
     
     with col1:
         st.metric(
-            "Success Rate",
+            "Accuracy (test set)",
             f"{metrics['accuracy']*100:.1f}%",
-            f"+{metrics['success_rate_improvement']*100:.1f}%"
+            f"+{metrics['success_rate_improvement']*100:.1f} pp vs 49.5% base rate"
         )
     
     with col2:
@@ -231,7 +246,8 @@ def show_performance_overview(metrics):
     
     # Business impact visualization
     st.markdown("---")
-    st.markdown("### 📊 Business Impact Visualization")
+    st.markdown("### 📊 Theoretical Scheduling Scenario")
+    st.caption("If only observations predicted as successful were scheduled, the expected success rate would equal the model's precision/accuracy on held-out data. This is a simulation on historical data, not a measured operational result. A time-based check (train 2021–2024, test 2025) gave lower performance; see the README.")
     
     col1, col2 = st.columns(2)
     
@@ -244,7 +260,7 @@ def show_performance_overview(metrics):
             value = metrics['accuracy'] * 100,
             delta = {'reference': 49.5},
             domain = {'x': [0.25, 1], 'y': [0.08, 0.5]},
-            title = {'text': "Success Rate"},
+            title = {'text': "Model accuracy vs base rate"},
             gauge = {
                 'shape': "bullet",
                 'axis': {'range': [0, 100]},
@@ -275,7 +291,7 @@ def show_performance_overview(metrics):
             value = metrics['failed_obs_reduction'] * 100,
             number = {'suffix': "%"},
             delta = {'position': "top", 'reference': 0},
-            title = {"text": "Failed Observations Reduced"},
+            title = {"text": "Failed observations reduced (simulated)"},
             domain = {'row': 0, 'column': 1}
         ))
         
@@ -294,10 +310,10 @@ def show_performance_overview(metrics):
     
     # Check for existing visualization files
     viz_files = {
-        "Model Comparison": "../4_data_analysis/ml_results/advanced/final_summary_visualization.png",
-        "Feature Importance": "../4_data_analysis/ml_results/interpretation/permutation_importance_plot.png",
-        "Error Analysis": "../4_data_analysis/ml_results/interpretation/error_patterns_visualization.png",
-        "Confidence Distribution": "../4_data_analysis/ml_results/interpretation/prediction_confidence_histogram.png"
+        "Model Comparison": RESULTS_DIR / "advanced/final_summary_visualization.png",
+        "Feature Importance": RESULTS_DIR / "interpretation/permutation_importance_plot.png",
+        "Error Analysis": RESULTS_DIR / "interpretation/error_patterns_visualization.png",
+        "Confidence Distribution": RESULTS_DIR / "interpretation/prediction_confidence_histogram.png"
     }
     
     for idx, (viz_name, viz_path) in enumerate(viz_files.items()):
@@ -614,11 +630,12 @@ else:
 
 def show_interactive_demo(feature_df):
     """Interactive demonstration of success prediction"""
-    st.markdown("## 🔮 Interactive Success Predictor")
+    st.markdown("## 🔮 Rule-Based Success Estimator")
+    st.info("This estimator applies simple rules derived from the model's insights (feature importance and business rules). It does **not** run the trained Random Forest, and its percentages are illustrative, not calibrated probabilities.")
     
     st.markdown("""
     This interactive demo shows how different observation parameters affect success probability.
-    Adjust the sliders to see how the estimated success rate changes based on the model's learned patterns.
+    Adjust the sliders to see how a simple rule-based score changes, using rules derived from the model's findings.
     """)
     
     # Create two columns for inputs
@@ -746,7 +763,7 @@ def show_interactive_demo(feature_df):
                 value=estimated_probability * 100,
                 delta={'reference': 49.5, 'relative': False},
                 domain={'x': [0, 1], 'y': [0, 1]},
-                title={'text': "Estimated Success Probability"},
+                title={'text': "Rule-based estimate (illustrative)"},
                 gauge={
                     'axis': {'range': [0, 100], 'tickwidth': 1},
                     'bar': {'color': "darkblue"},
@@ -771,8 +788,8 @@ def show_interactive_demo(feature_df):
             for adjustment in adjustments:
                 st.markdown(f"- {adjustment}")
             
-            st.markdown(f"**Baseline (random):** 49.5%")
-            st.markdown(f"**Estimated with rules:** {estimated_probability*100:.1f}%")
+            st.markdown("**Baseline (dataset success rate):** 49.5%")
+            st.markdown(f"**Rule-based estimate:** {estimated_probability*100:.1f}% (illustrative, not a model prediction)")
             
             # Recommendation
             st.markdown("### 🎯 Recommendation")

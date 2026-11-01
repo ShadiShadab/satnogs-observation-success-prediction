@@ -1,0 +1,32 @@
+{
+  "saved_lightgbm_on_test": {
+    "roc_auc": 0.9338,
+    "accuracy": 0.8653
+  },
+  "random_split_ablation": {
+    "all_features": {
+      "roc_auc": 0.9515,
+      "accuracy": 0.8892
+    },
+    "without_archived": {
+      "roc_auc": 0.9324,
+      "accuracy": 0.8631
+    },
+    "without_station_location_features": {
+      "roc_auc": 0.8352,
+      "accuracy": 0.7502
+    }
+  },
+  "time_split_train_2021_2024_test_2025": {
+    "train_rows": 418953,
+    "test_rows": 159057,
+    "all_features": {
+      "roc_auc": 0.6578,
+      "accuracy": 0.4629
+    },
+    "without_archived": {
+      "roc_auc": 0.7563,
+      "accuracy": 0.633
+    }
+  }
+}
